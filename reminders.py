@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from time import sleep
 from tkinter import *
+from backports.datetime_fromisoformat import MonkeyPatch
 import calendar
 
 '''
@@ -10,6 +11,7 @@ icons:
 dialog-information (i)
 dialog-error (!)
 '''
+MonkeyPatch.patch_fromisoformat()
 curr_time = datetime.now()
 months=('01','02','03','04','05','06','07','08','09','10','11','12')
 
@@ -28,7 +30,6 @@ def get_days():
         month = int(monthBox.get())
         year = int(yearBox.get())
     except NameError:
-        print("FUCK")
         month = int(datetime.now().strftime('%m'))
         year = int(datetime.now().strftime('%Y'))
 
@@ -37,19 +38,21 @@ def get_days():
     try:
         dayBox.config(values=tuple(days_list))
     except NameError:
-        print("FUCK")
+        hello = 1
 
     return tuple(days_list)
 
 
-def submit_data():
-    print("FUCK")
+def submit_data(hour, minute, month, day, year, msg):
+    timestamp = string_to_dt(month, day, year, hour, minute)
+    print(timestamp)
+    print(msg)
 
 # send_reminder("freeps", "AHHHHHHHHH", "critical", "dialog-error")
 
-print(datetime.now().strftime('%m/%d/%y -- %H:%M:%S'))
+#print(datetime.now().strftime('%m/%d/%y -- %H:%M:%S'))
 ##sleep(30)
-print(datetime.now().strftime('%x -- %X'))
+#print(datetime.now().strftime('%x -- %X'))
 ##days=tuple(get_days(int(datetime.now().strftime('%m')), int(datetime.now().strftime('%Y'))))
 ##print(days)
 
@@ -92,7 +95,11 @@ yearBox.grid(row=1,column=5)
 yearBox.delete(0,4)
 yearBox.insert(0, datetime.now().strftime('%Y'))
 
-submitButton = Button(root, text="Submit", command=submit_data).grid(row=8,column=1,pady=5)
+msgBox = Text(root, height=4, width=25, wrap=WORD)
+msgBox.grid(columnspan=6)
+
+
+submitButton = Button(root, text="Submit", command=lambda: submit_data(hoursBox.get(), minutesBox.get(), monthBox.get(), dayBox.get(), yearBox.get(), msgBox.get("1.0", "end-1c"))).grid(row=8,column=1,pady=5)
 
 root.update_idletasks()
 root.mainloop()
