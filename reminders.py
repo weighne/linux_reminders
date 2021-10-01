@@ -45,9 +45,23 @@ def get_days():
 
 def submit_data(hour, minute, month, day, year, msg):
     timestamp = string_to_dt(month, day, year, hour, minute)
+    with open('reminders.txt','a') as out_file:
+        out_file.write("{};{}".format(timestamp, msg))
+        out_file.write("\n")
+    background()
     print(timestamp)
     print(msg)
 
+
+def background():
+    with open('reminders.txt', 'r') as reminders:
+        while True:
+            for line in reminders.readlines():
+                if line.split(';')[0] == datetime.now().strftime('%Y-%m-%d %H:%M:%S'):
+                    send_reminder(line.split(';')[0], line.split(';')[1], "critical", "dialog-information")
+                else:
+                    print(line)
+            continue
 
 ##b = threading.Thread(name = "background", target = background)
 ##f = threading.Thread(name = "foreground", target = foreground)
