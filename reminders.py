@@ -48,64 +48,68 @@ def submit_data(hour, minute, month, day, year, msg):
     with open('reminders.txt','a') as out_file:
         out_file.write("{};{}".format(timestamp, msg))
         out_file.write("\n")
-    background()
     print(timestamp)
     print(msg)
 
 
 def background():
-    with open('reminders.txt', 'r') as reminders:
-        while True:
+    while True:
+        with open('reminders.txt', 'r') as reminders:
+            print("x")
             for line in reminders.readlines():
                 if line.split(';')[0] == datetime.now().strftime('%Y-%m-%d %H:%M:%S'):
                     send_reminder(line.split(';')[0], line.split(';')[1], "critical", "dialog-information")
+                    sleep(1)
+                    # need a way of flagging the reminder as sent so that it doesn't send 1000 of them
                 else:
-                    print(line)
-            continue
+                    sleep(1)
 
-##b = threading.Thread(name = "background", target = background)
-##f = threading.Thread(name = "foreground", target = foreground)
-##
-##f.start()
-##b.start()
 
-root = Tk()
-root.title("Reminders")
+def foreground():
+    root = Tk()
+    root.title("Reminders")
 
-timeLabel = Label(root, text="Time:").grid(row=0,column=0)
-hoursBox = Spinbox(root, from_=0, to=23, width=4)
-hoursBox.grid(row=0,column=1)
-hoursBox.delete(0,2)
-hoursBox.insert(0, datetime.now().strftime('%H'))
+    timeLabel = Label(root, text="Time:").grid(row=0,column=0)
+    hoursBox = Spinbox(root, from_=0, to=23, width=4)
+    hoursBox.grid(row=0,column=1)
+    hoursBox.delete(0,2)
+    hoursBox.insert(0, datetime.now().strftime('%H'))
 
-minutesBox = Spinbox(root, from_=0, to=59, width=4)
-minutesBox.grid(row=0,column=2)
-minutesBox.delete(0,2)
-minutesBox.insert(0, datetime.now().strftime('%M'))
-timeLabel2 = Label(root, text="(HH:MM)").grid(row=0,column=4,sticky=W)
+    minutesBox = Spinbox(root, from_=0, to=59, width=4)
+    minutesBox.grid(row=0,column=2)
+    minutesBox.delete(0,2)
+    minutesBox.insert(0, datetime.now().strftime('%M'))
+    timeLabel2 = Label(root, text="(HH:MM)").grid(row=0,column=4,sticky=W)
 
-dateLabel = Label(root, text="Date:").grid(row=1,column=0)
-monthBox = Spinbox(root, width=4, values=months, command=get_days)
-monthBox.grid(row=1,column=1)
-monthBox.delete(0,2)
-monthBox.insert(0, datetime.now().strftime('%m'))
+    dateLabel = Label(root, text="Date:").grid(row=1,column=0)
+    monthBox = Spinbox(root, width=4, values=months, command=get_days)
+    monthBox.grid(row=1,column=1)
+    monthBox.delete(0,2)
+    monthBox.insert(0, datetime.now().strftime('%m'))
 
-dayBox = Spinbox(root, width=4, values=get_days())
-dayBox.grid(row=1,column=2)
-dayBox.delete(0,2)
-dayBox.insert(0, datetime.now().strftime('%d'))
+    dayBox = Spinbox(root, width=4, values=get_days())
+    dayBox.grid(row=1,column=2)
+    dayBox.delete(0,2)
+    dayBox.insert(0, datetime.now().strftime('%d'))
 
-yearBox = Spinbox(root, width=4, from_=int(datetime.now().strftime('%Y')), to=9999)
-yearBox.grid(row=1,column=3)
-yearBox.delete(0,4)
-yearBox.insert(0, datetime.now().strftime('%Y'))
-dateLabel2 = Label(root, text="(MM/DD/YYYY)").grid(row=1,column=4)
+    yearBox = Spinbox(root, width=4, from_=int(datetime.now().strftime('%Y')), to=9999)
+    yearBox.grid(row=1,column=3)
+    yearBox.delete(0,4)
+    yearBox.insert(0, datetime.now().strftime('%Y'))
+    dateLabel2 = Label(root, text="(MM/DD/YYYY)").grid(row=1,column=4)
 
-msgLabel = Label(root, text="Reminder Text:").grid(columnspan=6)
-msgBox = Text(root, height=4, width=25, wrap=WORD)
-msgBox.grid(columnspan=6)
+    msgLabel = Label(root, text="Reminder Text:").grid(columnspan=6)
+    msgBox = Text(root, height=4, width=25, wrap=WORD)
+    msgBox.grid(columnspan=6)
 
-submitButton = Button(root, text="Submit", command=lambda: submit_data(hoursBox.get(), minutesBox.get(), monthBox.get(), dayBox.get(), yearBox.get(), msgBox.get("1.0", "end-1c"))).grid(row=8,pady=5,columnspan=6)
+    submitButton = Button(root, text="Submit", command=lambda: submit_data(hoursBox.get(), minutesBox.get(), monthBox.get(), dayBox.get(), yearBox.get(), msgBox.get("1.0", "end-1c"))).grid(row=8,pady=5,columnspan=6)
 
-root.update_idletasks()
-root.mainloop()
+    root.update_idletasks()
+    root.mainloop()
+
+
+b = threading.Thread(name = "background", target = background)
+f = threading.Thread(name = "foreground", target = foreground)
+
+f.start()
+b.start()
